@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Termed's To-Do-Liste</title>
+<meta name="theme-color" content="#F3EBDD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E1A15" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="To-Dos">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <h1>Termed's To-Do-Liste</h1>
+      <button class="icon-btn" id="sync" type="button" aria-label="Neu laden">↻</button>
+    </div>
+    <div class="sub" id="summary"><span>Lädt …</span></div>
+    <div class="filters" role="group" aria-label="Bereich filtern" id="filters"></div>
+  </header>
+
+  <p class="status" id="status" hidden></p>
+
+  <section id="setup" class="setup" hidden>
+    <h2>Einmal verbinden</h2>
+    <p>Deine To-dos liegen in deinem privaten GitHub-Repo <b>termed-todo-data</b>. Damit die App sie lesen und abhaken kann, braucht sie einmal einen Schlüssel von GitHub.</p>
+    <ol>
+      <li>Öffne <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com → Neuer Schlüssel</a>.</li>
+      <li>Name: „To-Do-App“, Ablauf: 1 Jahr.</li>
+      <li>Repository access: <b>Only select repositories</b> → <b>termed-todo-data</b>.</li>
+      <li>Permissions → Repository → <b>Contents: Read and write</b>.</li>
+      <li>„Generate token“ tippen, den Schlüssel kopieren und hier einfügen.</li>
+    </ol>
+    <form id="token-form" autocomplete="off">
+      <label for="token">GitHub-Schlüssel</label>
+      <input id="token" type="password" required placeholder="github_pat_…" autocapitalize="off" spellcheck="false">
+      <button class="btn" type="submit">Verbinden</button>
+    </form>
+    <p class="hint">Der Schlüssel bleibt nur auf diesem Gerät gespeichert und darf nur dieses eine Repo lesen und schreiben.</p>
+  </section>
+
+  <main id="list"></main>
+
+  <form id="add" autocomplete="off" hidden>
+    <h2>Neues To-do</h2>
+    <label for="f-title">Was ist zu tun?</label>
+    <input id="f-title" required maxlength="160" placeholder="z. B. Angebot an Dario schicken">
+    <div class="row">
+      <div><label for="f-area">Bereich</label><select id="f-area"></select></div>
+      <div><label for="f-due">Bis wann</label><input id="f-due" type="date"></div>
+    </div>
+    <label for="f-note">Notiz (optional)</label>
+    <input id="f-note" maxlength="300" placeholder="Details, Link, Betrag …">
+    <button class="btn" type="submit">Hinzufügen</button>
+  </form>
+
+  <footer><button class="link" id="logout" type="button" hidden>Schlüssel auf diesem Gerät entfernen</button></footer>
+</div>
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
