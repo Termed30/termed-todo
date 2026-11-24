@@ -99,7 +99,11 @@ async function refresh() {
 
 function handleError(e, fallback) {
   if (e.code === "auth") { store.del(K.token); showSetup(true); tokenMsg("Der gespeicherte GitHub-Schlüssel gilt nicht mehr. Bitte einen neuen anlegen und hier einfügen."); return; }
-  if (e.code === "notfound") { setStatus("Das Repo termed-todo-data wurde nicht gefunden. Hat der Schlüssel Zugriff darauf?"); return; }
+  if (e.code === "notfound") {
+    store.del(K.token); showSetup(true); setStatus("");
+    tokenMsg("Der Schlüssel darf das private Repo noch nicht sehen. Auf GitHub beim Schlüssel „Repository access → Only select repositories → termed-todo-data“ und „Contents: Read and write“ einstellen, dann hier nochmal einfügen.");
+    return;
+  }
   if (!navigator.onLine) { setStatus("Offline. Du siehst den letzten Stand. Abhaken geht wieder, sobald du Netz hast."); return; }
   setStatus(fallback + " Tipp oben auf ↻ und versuch es nochmal.");
 }
