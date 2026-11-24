@@ -40,8 +40,12 @@
     </ol>
     <form id="token-form" autocomplete="off">
       <label for="token">GitHub-Schlüssel</label>
-      <input id="token" type="password" required placeholder="github_pat_…" autocapitalize="off" spellcheck="false">
-      <button class="btn" type="submit">Verbinden</button>
+      <input id="token" type="text" inputmode="text" required placeholder="github_pat_…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+      <div class="btns">
+        <button class="btn ghost" id="paste" type="button">Einfügen</button>
+        <button class="btn" id="connect" type="submit">Verbinden</button>
+      </div>
+      <p class="form-msg" id="token-msg" role="status" hidden></p>
     </form>
     <p class="hint">Der Schlüssel bleibt nur auf diesem Gerät gespeichert und darf nur dieses eine Repo lesen und schreiben.</p>
   </section>

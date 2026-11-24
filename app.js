@@ -98,7 +98,7 @@ async function refresh() {
 }
 
 function handleError(e, fallback) {
-  if (e.code === "auth") { setStatus("Der GitHub-Schlüssel gilt nicht mehr. Bitte neu verbinden."); store.del(K.token); showSetup(true); return; }
+  if (e.code === "auth") { store.del(K.token); showSetup(true); tokenMsg("Der gespeicherte GitHub-Schlüssel gilt nicht mehr. Bitte einen neuen anlegen und hier einfügen."); return; }
   if (e.code === "notfound") { setStatus("Das Repo termed-todo-data wurde nicht gefunden. Hat der Schlüssel Zugriff darauf?"); return; }
   if (!navigator.onLine) { setStatus("Offline. Du siehst den letzten Stand. Abhaken geht wieder, sobald du Netz hast."); return; }
   setStatus(fallback + " Tipp oben auf ↻ und versuch es nochmal.");
@@ -202,11 +202,43 @@ function showSetup(on) {
 }
 
 // ---------- Ereignisse ----------
-$("token-form").addEventListener("submit", (ev) => {
+function tokenMsg(text, ok) {
+  const m = $("token-msg"); m.textContent = text || ""; m.hidden = !text; m.classList.toggle("ok", !!ok);
+}
+const cleanToken = (s) => (s || "").replace(/\s+/g, "").replace(/^["'“”„]+|["'“”„]+$/g, "");
+
+$("paste").addEventListener("click", async () => {
+  try {
+    const t = cleanToken(await navigator.clipboard.readText());
+    if (t) { $("token").value = t; tokenMsg(""); } else tokenMsg("In der Zwischenablage ist nichts. Kopier den Schlüssel bei GitHub nochmal.");
+  } catch (e) { tokenMsg("Einfügen per Knopf geht hier nicht. Tipp lange ins Feld und wähle „Einsetzen“."); $("token").focus(); }
+});
+
+// Schlüssel erst speichern, wenn GitHub ihn angenommen hat.
+$("token-form").addEventListener("submit", async (ev) => {
   ev.preventDefault();
-  const v = $("token").value.trim(); if (!v) return;
-  store.set(K.token, v); $("token").value = "";
-  refresh();
+  const v = cleanToken($("token").value);
+  if (!v) { tokenMsg("Das Feld ist leer. Füg zuerst den Schlüssel ein."); return; }
+  if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)) {
+    tokenMsg("Das sieht nicht wie ein GitHub-Schlüssel aus. Er beginnt mit „github_pat_“. Bitte ganz kopieren.");
+    return;
+  }
+  const btn = $("connect"); btn.disabled = true; btn.textContent = "Prüfe …"; tokenMsg("");
+  const old = store.get(K.token);
+  store.set(K.token, v);
+  try {
+    const r = await load();
+    todos = r.todos; sha = r.sha; cache();
+    $("token").value = ""; tokenMsg("");
+    showSetup(false); setStatus(""); render();
+  } catch (e) {
+    if (old) store.set(K.token, old); else store.del(K.token);
+    const why = {
+      auth: "GitHub lehnt den Schlüssel ab. Entweder falsch kopiert oder er hat bei „Repository permissions → Contents“ nicht „Read and write“.",
+      notfound: "Der Schlüssel sieht das Repo nicht. Bei „Repository access“ muss „Only select repositories → termed-todo-data“ gewählt sein.",
+    }[e.code] || (navigator.onLine ? "Verbinden hat nicht geklappt (Fehler " + (e.message || "?") + "). Versuch es gleich nochmal." : "Du bist offline. Verbinden geht nur mit Internet.");
+    tokenMsg(why);
+  } finally { btn.disabled = false; btn.textContent = "Verbinden"; }
 });
 $("logout").addEventListener("click", () => { store.del(K.token); todos = []; store.del(K.cache); showSetup(true); render(); });
 $("sync").addEventListener("click", refresh);

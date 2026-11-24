@@ -1,5 +1,5 @@
 // Offline-Hülle: App-Dateien aus dem Cache, Daten immer frisch von GitHub.
-const CACHE = "termed-todo-v1";
+const CACHE = "termed-todo-v2";
 const FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
